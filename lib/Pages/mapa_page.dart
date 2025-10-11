@@ -1,6 +1,7 @@
   import 'dart:convert';
   import 'dart:math' show min, max;
-  import 'package:flutter/material.dart';
+  import 'package:app_rutas_repartidor/Pages/login_page.dart';
+import 'package:flutter/material.dart';
   import 'package:google_maps_flutter/google_maps_flutter.dart';
   import 'package:supabase_flutter/supabase_flutter.dart';
   import 'package:geolocator/geolocator.dart';
@@ -195,7 +196,65 @@
     @override
     Widget build(BuildContext context) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Mi Map')),
+        appBar: AppBar(
+        title: const Text('Mi Map'),
+        actions: [
+         IconButton(
+  icon: const Icon(Icons.logout),
+  tooltip: 'Cerrar sesión',
+  onPressed: () async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cerrar sesión'),
+        content: const Text('¿Seguro que deseas cerrar tu sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Cerrar sesión'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar == true) {
+      try {
+        await Future.delayed(const Duration(milliseconds: 200));
+
+        await Supabase.instance.client.auth.signOut(scope: SignOutScope.global);
+
+        await Future.delayed(const Duration(milliseconds: 300));
+
+        _markers.clear();
+        _polylines.clear();
+        _origen = null;
+        _destino = null;
+
+        if (context.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginPage()),
+            (route) => false,
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error al cerrar sesión: $e')),
+          );
+        }
+      }
+    }
+  },
+),
+
+
+  ],
+),
         body: Stack(
     children: [
       GoogleMap(
@@ -211,11 +270,11 @@
       ),
   if (_destino != null)
     Positioned(
-  bottom: 40, // 👈 más arriba del borde
+  bottom: 40, 
   left: 20,
   right: 20,
   child: Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch, // 👈 para que el botón se expanda
+    crossAxisAlignment: CrossAxisAlignment.stretch, 
     children: [
       if (_duracionEstimado != null)
         Padding(
