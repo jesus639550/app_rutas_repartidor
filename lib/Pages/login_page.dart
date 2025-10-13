@@ -38,68 +38,108 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> _registrar() async {
-    setState(() => cargando = true);
-    try {
-      await Supabase.instance.client.auth.signUp(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-      setState(() => errorMsg =
-          'Cuenta creada. Revisa tu correo para confirmar tu cuenta.');
-    } catch (e) {
-      setState(() => errorMsg = 'Error: $e');
-    } finally {
-      setState(() => cargando = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final primaryBlue = Colors.lightBlue[400];
+    final backgroundBlue = Colors.blue[50];
+
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: backgroundBlue, // Fondo azul claro
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           child: Card(
-            elevation: 5,
+            elevation: 8,
+            shadowColor: Colors.blue[100],
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16)),
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(28),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Iniciar Sesión',
-                      style:
-                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
+                  const Icon(Icons.location_on,
+                      color: Colors.lightBlue, size: 60),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Farmacias Díaz',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue[700],
+                    ),
+                  ),
+                  const SizedBox(height: 25),
                   TextField(
                     controller: emailController,
-                    decoration: const InputDecoration(labelText: 'Correo'),
+                    decoration: InputDecoration(
+                      labelText: 'Correo electrónico',
+                      prefixIcon: const Icon(Icons.email, color: Colors.lightBlue),
+                      filled: true,
+                      fillColor: Colors.blue[50],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.lightBlue.shade200),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.lightBlue.shade400, width: 2),
+                      ),
+                    ),
                   ),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: passwordController,
                     obscureText: true,
-                    decoration:
-                        const InputDecoration(labelText: 'Contraseña'),
+                    decoration: InputDecoration(
+                      labelText: 'Contraseña',
+                      prefixIcon: const Icon(Icons.lock, color: Colors.lightBlue),
+                      filled: true,
+                      fillColor: Colors.blue[50],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.lightBlue.shade200),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.lightBlue.shade400, width: 2),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   if (errorMsg != null)
-                    Text(errorMsg!,
-                        style: const TextStyle(color: Colors.red)),
-                  const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Text(
+                        errorMsg!,
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ElevatedButton(
                     onPressed: cargando ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryBlue,
+                      minimumSize: const Size(double.infinity, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      shadowColor: Colors.blue[100],
+                      elevation: 4,
+                    ),
                     child: cargando
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Entrar'),
+                        : const Text(
+                            'Iniciar sesión',
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
                   ),
-                  const SizedBox(height: 18),
-                  /*TextButton(
-                    onPressed: cargando ? null : _registrar,
-                    child: const Text('Crear cuenta'),
-                  ), */
+                  const SizedBox(height: 20),
+                  Text(
+                    '© 2025 Mi Map',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  ),
                 ],
               ),
             ),
