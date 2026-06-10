@@ -1,6 +1,7 @@
   import 'dart:convert';
   import 'dart:math' show min, max;
-  import 'package:app_rutas_repartidor/Pages/login_page.dart';
+  import 'package:app_rutas_repartidor/Pages/gestion_clientes_page.dart';
+import 'package:app_rutas_repartidor/Pages/login_page.dart';
   import 'package:flutter/material.dart';
   import 'package:google_maps_flutter/google_maps_flutter.dart';
   import 'package:supabase_flutter/supabase_flutter.dart';
@@ -75,27 +76,70 @@
   }
     // Traer destinos desde Supabase
   Future<void> _cargarDestinosSupabase() async {
-      final response = await Supabase.instance.client.from('destinos').select();
-      for (var d in response) {
-        final destino = LatLng(d['lat'], d['lng']);
-        _markers.add(
-          Marker(
-            markerId: MarkerId(d['id'].toString()),
-            position: destino,
-            infoWindow: InfoWindow(title: d['nombre'], snippet: d['direccion']),
-            onTap: () {
-              setState(() {
-                _destino = destino;
-              });
-              if (_origen != null) {
-                _trazarRuta(_origen!, _destino!);
-              }
-            },
-          ),
-        );
-      }
-      setState(() {});
-    }
+  final response = await Supabase.instance.client.from('destinos').select();
+
+  print('FARMACIAS: $response');
+
+  for (var d in response) {
+    final destino = LatLng(
+      (d['lat'] as num).toDouble(),
+      (d['lng'] as num).toDouble(),
+    );
+
+    _markers.add(
+      Marker(
+        markerId: MarkerId(d['id'].toString()),
+        position: destino,
+        infoWindow: InfoWindow(
+          title: d['nombre'],
+          snippet: d['direccion'],
+        ),
+        onTap: () {
+          setState(() {
+            _destino = destino;
+          });
+
+          if (_origen != null) {
+            _trazarRuta(_origen!, _destino!);
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.white,
+              content: const Text(
+                'Ver clientes de esta farmacia',
+                style: TextStyle(color: Colors.black),
+              ),
+              action: SnackBarAction(
+                label: 'Abrir',
+                textColor: Colors.blue,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GestionClientesPage(
+                        destinoId: d['id'],
+                        nombreFarmacia: d['nombre'],
+                      ),
+                    ),
+                  );
+                },
+              ),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: Colors.blueAccent),
+              ),
+              margin: const EdgeInsets.all(10),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  setState(() {});
+}
 
   Future<void> _trazarRuta(LatLng origen, LatLng destino) async {
     final url = Uri.parse('https://routes.googleapis.com/directions/v2:computeRoutes');
@@ -335,7 +379,7 @@
                 ),
               if (_destino != null)
                 Positioned(
-              bottom: 40, 
+              bottom: 45, 
               left: 20,
               right: 20,
               child: Column(
